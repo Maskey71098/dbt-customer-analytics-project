@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: int_customer_rfm_base
+    description: "{{ doc('int_rfm_base_desc') }}"
+    columns:
+      - name: customer_id
+        description: "Customer surrgate key."
+      - name: channel
+        description: "Sales Channel: 'STORE' OR 'WEB'. "
+      - name: last_purchase_date
+        description: "Most recent sold_date per customer & channel."
+      - name: recency_days
+        description: "Days since last purchase."
+      - name: frequency
+        description: "Transaction count per customer & channel."
+      - name: monetary
+        description: "Total spend per customer & channel."
+
+  - name: rfm_customer_scores
+    description: " {{ doc('rfm_scores_desc') }} "
+    columns:
+      - name: r_score
+        description: "NTILE(5) of recency_days (ascending) within channel."
+      - name: f_score
+        description: "NTILE(5) of frequency (descending) within channel."
+      - name: m_score
+        description: "NTILE(5) of monetary (descending) within channel."
+
+
+  - name: mart__customer_segment
+    description: " {{ doc('rfm_segments_desc') }} "
+    columns:
+      - name: customer_id
+        tests: [not_null]
+      - name: channel
+        tests:
+          - accepted_values:
+              values: ['STORE', 'WEB']
+      - name: segment_label
+        description: "{{ doc('segment_labels_desc') }}"
+        tests: [not_null]
+    meta:
+      owner: "Marketing Analytics"
+      pii: false
+      refresh: "Daily via dbt Cloud job"
+
+        
