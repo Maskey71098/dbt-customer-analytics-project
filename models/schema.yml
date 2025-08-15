@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: mart__customer_segment
+    columns:
+      - name: customer_id
+        tests: [not_null]
+      - name: channel
+        tests:
+          - accepted_values:
+              values: ['STORE', 'WEB']
+      - name: segment_label
+        tests: [not_null]

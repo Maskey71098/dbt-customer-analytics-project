@@ -4,12 +4,12 @@ WITH store_sales
                 ss_ticket_number AS TICKET_NUMBER,
                 ss_item_sk       AS ITEM_SK,
                 ss_net_paid      AS NET_PAID
-         FROM   snowflake_sample_data.tpcds_sf100tcl.store_sales
+         FROM   {{ source('tpcds', 'STORE_SALES') }}
          WHERE  ss_customer_sk IS NOT NULL),
      date
      AS (SELECT d_date_sk,
                 d_date
-         FROM   snowflake_sample_data.tpcds_sf100tcl.date_dim)
+         FROM   {{ source('tpcds', 'DATE_DIM') }})
 SELECT S.customer_id,
        D.d_date        AS SOLD_DATE,
        S.ticket_number AS TICKET_OR_ORDER,

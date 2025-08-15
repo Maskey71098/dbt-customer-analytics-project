@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: tpcds
+    database: SNOWFLAKE_SAMPLE_DATA
+    schema: TPCDS_SF100TCL
+    tables:
+      - name: STORE_SALES
+      - name: WEB_SALES
+      - name: DATE_DIM
+      - name: CUSTOMER
