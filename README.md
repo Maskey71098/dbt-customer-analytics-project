@@ -77,3 +77,89 @@ dbt test
 
 # only singular tests
 dbt test --select path:tests
+
+---
+
+# Snowflake Snowsight Dashboard — RFM Customer Segmentation
+
+A complete guide to recreate the **RFM Customer Segmentation** dashboard in **Snowsight**.  
+Assumes your mart tables live in `CUSTOMER_ANALYTICS.MART` and include:
+- `MART__CUSTOMER_SEGMENT` (final labels)
+- `RFM_CUSTOMER_SCORES` (scores & metrics)
+
+> **Tip:** Prefer **Column Filters** over SQL keyword parameters; they inject the `WHERE` clause automatically across tiles.
+
+---
+
+## 1) Context & Defaults
+
+- **Database / Schema:** `CUSTOMER_ANALYTICS.MART`  
+- **Warehouse:** `WH_ANALYTICS` (or any size you prefer)  
+- **Grain:** `MART__CUSTOMER_SEGMENT` is one row per `customer_id` **per `channel`** (STORE/WEB).  
+  - For “unique customers” across channels, use `COUNT(DISTINCT customer_id)`.
+
+---
+
+## 2) Filters (Add Once → Apply to All Tiles)
+
+Create **Column Filters** via **Dashboard → Filters → + Filter → Column**:
+
+### 2.1 `CHANNEL`
+- Column: `CHANNEL`
+- Multi-select: **On**
+- Include “All”: **On**
+- Apply to: **All tiles**
+
+### 2.2 `SEGMENT_LABEL`
+- Column: `SEGMENT_LABEL`
+- Multi-select: **On**
+- Include “All”: **On**
+- Apply to: **All tiles**
+
+> Optional date controls require a sales-level model with a date column. The mart tables here are already aggregated by customer/channel.
+
+---
+
+## 3) KPI Tiles
+
+### 3.1 KPI — Total Customers (row grain)
+```sql
+select count(*) as total_customers
+from CUSTOMER_ANALYTICS.MART.MART__CUSTOMER_SEGMENT;
+
+### 3.2 KPI - Total Revenue
+```sql
+select round(sum(monetary),2) as total_revenue
+from CUSTOMER_ANALYTICS.MART.MART__CUSTOMER_SEGMENT;
+
+## 4) Clustered Bar Charts
+
+### 4.1 Customers by Segment & Channel
+```sql
+select
+  segment_label,
+  channel,
+  count(*) as customers
+from CUSTOMER_ANALYTICS.MART.MART__CUSTOMER_SEGMENT
+group by 1,2
+order by customers desc;
+
+### 4.2 Revenue by Segment & Channel
+```sql
+select
+  segment_label,
+  channel,
+  sum(monetary) as total_revenue
+from CUSTOMER_ANALYTICS.MART.MART__CUSTOMER_SEGMENT
+group by 1,2
+order by total_revenue desc;
+
+---
+
+## 5) Screenshots
+
+### 5.1 Project Graph Lineage
+
+### 5.2 Dashboard
+
+
