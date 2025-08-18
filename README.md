@@ -167,7 +167,7 @@ ORDER BY total_revenue DESC;
 ## 5) Screenshots
 
 ### 5.1 Project Graph Lineage
-![Project Graph Lineage](images/Lineage graph.png)
+![Project Graph Lineage](images/Lineage-graph.png)
 
 ### 5.2 Dashboard
 ![Dashboard](images/Visualization.png)
