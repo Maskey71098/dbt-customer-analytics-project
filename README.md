@@ -31,7 +31,7 @@ The project unifies **Store** and **Web** sales, scores customers on **Recency, 
 - **Frequency (F):** number of purchases (more often → higher score)  
 - **Monetary (M):** total spend (higher → higher score)
 
-Each pillar is ranked into **five bands (1–5)**; `R,F,M` combine into a customer “fingerprint” that maps to a segment.
+Each pillar is ranked into **five bands (1–5)**; `R,F,M` combine into a customer "fingerprint" that maps to a segment.
 
 ---
 
@@ -62,6 +62,7 @@ This repo uses both **generic tests** (in `schema.yml`) and **singular tests** (
 - **Data quality:** `not_null` on dates/amounts; `accepted_values` for `channel` (`STORE`, `WEB`)
 
 ### Singular tests (custom SQL under `/tests`)
+
 | File | What it checks | Why it matters |
 |---|---|---|
 | `tests/test_customer_exists_in_stg.sql` | Every downstream customer exists in `stg_customers` | Avoid orphan rows introduced by joins/unions |
@@ -77,6 +78,7 @@ dbt test
 
 # only singular tests
 dbt test --select path:tests
+```
 
 ---
 
@@ -96,7 +98,7 @@ Assumes your mart tables live in `CUSTOMER_ANALYTICS.MART` and include:
 - **Database / Schema:** `CUSTOMER_ANALYTICS.MART`  
 - **Warehouse:** `WH_ANALYTICS` (or any size you prefer)  
 - **Grain:** `MART__CUSTOMER_SEGMENT` is one row per `customer_id` **per `channel`** (STORE/WEB).  
-  - For “unique customers” across channels, use `COUNT(DISTINCT customer_id)`.
+  - For "unique customers" across channels, use `COUNT(DISTINCT customer_id)`.
 
 ---
 
@@ -107,13 +109,13 @@ Create **Column Filters** via **Dashboard → Filters → + Filter → Column**:
 ### 2.1 `CHANNEL`
 - Column: `CHANNEL`
 - Multi-select: **On**
-- Include “All”: **On**
+- Include "All": **On**
 - Apply to: **All tiles**
 
 ### 2.2 `SEGMENT_LABEL`
 - Column: `SEGMENT_LABEL`
 - Multi-select: **On**
-- Include “All”: **On**
+- Include "All": **On**
 - Apply to: **All tiles**
 
 > Optional date controls require a sales-level model with a date column. The mart tables here are already aggregated by customer/channel.
@@ -124,42 +126,48 @@ Create **Column Filters** via **Dashboard → Filters → + Filter → Column**:
 
 ### 3.1 KPI — Total Customers (row grain)
 ```sql
-select count(*) as total_customers
-from CUSTOMER_ANALYTICS.MART.MART__CUSTOMER_SEGMENT;
+SELECT COUNT(*) AS total_customers
+FROM CUSTOMER_ANALYTICS.MART.MART__CUSTOMER_SEGMENT;
+```
 
-### 3.2 KPI - Total Revenue
+### 3.2 KPI — Total Revenue
 ```sql
-select round(sum(monetary),2) as total_revenue
-from CUSTOMER_ANALYTICS.MART.MART__CUSTOMER_SEGMENT;
+SELECT ROUND(SUM(monetary), 2) AS total_revenue
+FROM CUSTOMER_ANALYTICS.MART.MART__CUSTOMER_SEGMENT;
+```
+
+---
 
 ## 4) Clustered Bar Charts
 
 ### 4.1 Customers by Segment & Channel
 ```sql
-select
+SELECT
   segment_label,
   channel,
-  count(*) as customers
-from CUSTOMER_ANALYTICS.MART.MART__CUSTOMER_SEGMENT
-group by 1,2
-order by customers desc;
+  COUNT(*) AS customers
+FROM CUSTOMER_ANALYTICS.MART.MART__CUSTOMER_SEGMENT
+GROUP BY 1, 2
+ORDER BY customers DESC;
+```
 
 ### 4.2 Revenue by Segment & Channel
 ```sql
-select
+SELECT
   segment_label,
   channel,
-  sum(monetary) as total_revenue
-from CUSTOMER_ANALYTICS.MART.MART__CUSTOMER_SEGMENT
-group by 1,2
-order by total_revenue desc;
+  SUM(monetary) AS total_revenue
+FROM CUSTOMER_ANALYTICS.MART.MART__CUSTOMER_SEGMENT
+GROUP BY 1, 2
+ORDER BY total_revenue DESC;
+```
 
 ---
 
 ## 5) Screenshots
 
 ### 5.1 Project Graph Lineage
+![Project Graph Lineage](images/Lineage graph.png)
 
 ### 5.2 Dashboard
-
-
+![Dashboard](images/Visualization.png)
